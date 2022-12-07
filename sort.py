@@ -14,11 +14,15 @@ args = cli_parser.parse_args()
 
 permutation = []
 
+# Either take the input permutation, generate a random permutation, or default
+# to a permutation containing 37 elements in case neither -p or -r are set.
 if(args.permutation):
     split = args.permutation.split(" ")
     permutation = [int(x) for x in split]
 elif(args.random):
     permutation=list(rand_perm(args.random))
+
+    # we randomly assign each element a +/- with 50/50 probability
     for i in range(0,len(permutation)):
         permutation[i]+=1
         r = random.randint(0,10)
@@ -32,16 +36,24 @@ else:
         if(r>=5):
             permutation[i]*=-1
 
+# If an identity permutation is specified, we alter the input permutation such
+# that the output is for optimally sorting identity -> permutation
 if(args.identity):
     if(args.permutation):
         split = args.identity.split(" ")
         identity = [int(x) for x in split]
+
+        # TODO: MAKE INVERSION WORK FOR NEGATIVE ELEMENTS
+
+        # To sort identity to pi we apply the inverse of identity to pi
+        # (and the identity itself).
         inv_identity = inverse(identity)
         permutation=composition(inv_identity,permutation)
-        print(inv_identity)
-        print(permutation)
 
 t1=time.time()
+
+
+# The following code follows the pseudocode of Algorithm 1 closely.
 misc_dec=get_misc_dec(permutation)
 k = ceil(log2(len(misc_dec)))
 patterns=get_patterns(k)
@@ -68,10 +80,14 @@ if(dist==-1):
         else:
             pattern=p
             break
-
-print("Input:")
+print()
+print()
+print("Input Permutation: ",end="")
 pprint_perm(permutation)
-print(pattern)
+print("MISC-Encoding: ",end="")
+print("".join( [x[0] for x in misc_dec] ))
+print("Subsequence of pattern: ",end="")
+print(pattern[1])
 print("Distance: " + str(dist) + " TDRL/iTDRL")
 print("*********************************************")
 while(dist!=0):
@@ -95,5 +111,7 @@ while(dist!=0):
             pattern=("riTDRL",pat)
         else:
             pattern=("TDRL",pat)
+
+## # TODO: IMPLEMENT MAPPING BACK OUTPUT IN CASE THE IDENTITY IS SPECIFIED.
 t2=time.time()
 print("Sorting Scenario calculated in " + str(t2-t1) + "s.")
