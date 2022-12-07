@@ -6,19 +6,41 @@ cli_parser=argparse.ArgumentParser()
 cli_parser.add_argument("-r","--random",type=int, help="randomly generate a permutation;" +
                         "\nspecify length as argument.")
 cli_parser.add_argument("-p","--permutation",help="space seperated target permutation, " +
-                         "\ni.e. 3 1 2 -4 -5 -6 7 8")
+                         "\ni.e. 3 1 2 -4 -5 -6 7 8. ")
 cli_parser.add_argument("-i","--identity",help="space seperated identity permutation, " +
-                         "\ni.e. 1 2 3 4 5 6 7 8")
-cli_parser.parse_args()
-input()
+                         "\ni.e. 1 2 3 4 5 6 7 8. \nThis argument is ignored if " +
+                         "-p/--permutation is not set.")
+args = cli_parser.parse_args()
 
-# permutation = [-6,-5,-7,-9,-8,4,3,2,1]
-permutation=list(rand_perm(100))
-for i in range(0,len(permutation)):
-    permutation[i]+=1
-    r = random.randint(0,10)
-    if(r>=2):
-        permutation[i]*=-1
+permutation = []
+
+if(args.permutation):
+    split = args.permutation.split(" ")
+    permutation = [int(x) for x in split]
+elif(args.random):
+    permutation=list(rand_perm(args.random))
+    for i in range(0,len(permutation)):
+        permutation[i]+=1
+        r = random.randint(0,10)
+        if(r>=5):
+            permutation[i]*=-1
+else:
+    permutation=list(rand_perm(37))
+    for i in range(0,len(permutation)):
+        permutation[i]+=1
+        r = random.randint(0,10)
+        if(r>=5):
+            permutation[i]*=-1
+
+if(args.identity):
+    if(args.permutation):
+        split = args.identity.split(" ")
+        identity = [int(x) for x in split]
+        inv_identity = inverse(identity)
+        permutation=composition(inv_identity,permutation)
+        print(inv_identity)
+        print(permutation)
+
 t1=time.time()
 misc_dec=get_misc_dec(permutation)
 k = ceil(log2(len(misc_dec)))

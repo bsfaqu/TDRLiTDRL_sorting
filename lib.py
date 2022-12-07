@@ -90,6 +90,8 @@ def get_patterns(k):
 
     ## TODO: RECURSIVELY GENERATE PATTERNS FOR k-1,...,1 IF PATTERNS FOR k ARE
     ## NOT AVAILIABLE. --> GENERATE FILES FOR MISSING PATTERNS
+    if(k == 0):
+        return []
 
     # Test whether a file containing all patterns of length 2^k exists
     try:
@@ -243,6 +245,18 @@ def oplus(misc_1,misc_2):
 
     return merge_misc
 
+def inverse(perm):
+    inv_perm = [0 for x in perm]
+    for x in range(0, len(perm)):
+        inv_perm[perm[x] - 1] = x + 1
+    return inv_perm
+
+def composition(p1, p2):
+    comp_perm = [0 for x in p1]
+    for x in range(0, len(p2)):
+        comp_perm[x] = p1[p2[x] - 1]
+    return comp_perm
+
 def reverse(permutation):
     """
     Implements the reversion operation (for permutations or strings of integers)
@@ -370,7 +384,6 @@ def transformation(permutation,pattern,misc_dec,misc_mapping):
     elif(pattern[0]=="liTDRL"):
         misc_1=[]
         misc_2=[]
-        L_copy=[]
 
         # Derive pattern T(permutation,pattern) is subsequence of.
         # For liTDRL this is the last half of the pattern.
@@ -405,7 +418,6 @@ def transformation(permutation,pattern,misc_dec,misc_mapping):
     elif(pattern[0]=="riTDRL"):
         misc_1=[]
         misc_2=[]
-        R_copy=[]
 
         # Derive pattern T(permutation,pattern) is subsequence of.
         # For riTDRL, this is the first half of the input pattern
