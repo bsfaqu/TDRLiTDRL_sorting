@@ -1,7 +1,19 @@
 from lib import *
+import argparse
+
+cli_parser=argparse.ArgumentParser()
+
+cli_parser.add_argument("-r","--random",type=int, help="randomly generate a permutation;" +
+                        "\nspecify length as argument.")
+cli_parser.add_argument("-p","--permutation",help="space seperated target permutation, " +
+                         "\ni.e. 3 1 2 -4 -5 -6 7 8")
+cli_parser.add_argument("-i","--identity",help="space seperated identity permutation, " +
+                         "\ni.e. 1 2 3 4 5 6 7 8")
+cli_parser.parse_args()
+input()
 
 # permutation = [-6,-5,-7,-9,-8,4,3,2,1]
-permutation=list(rand_perm(50000))
+permutation=list(rand_perm(100))
 for i in range(0,len(permutation)):
     permutation[i]+=1
     r = random.randint(0,10)
