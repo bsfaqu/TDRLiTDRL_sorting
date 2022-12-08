@@ -17,6 +17,7 @@ cli_parser.add_argument("-i", "--identity", help="space separated identity permu
 args = cli_parser.parse_args()
 
 permutation = []
+identity = []
 
 # Either take the input permutation, generate a random permutation, or default
 # to a permutation containing 37 elements in case neither -p nor -r are set.
@@ -93,10 +94,16 @@ print("Permutation_" + str(dist) + ": ", end="")
 pprint_perm(permutation)
 print("MISC-Encoding: ", end="")
 # print("".join([x[0] for x in misc_dec]))
-pprint_misc_enc(misc_dec,subseq_map,len(pattern[1]))
+pprint_misc_enc(misc_dec, subseq_map, len(pattern[1]))
 print("Pattern      : ", end="")
 print(pattern[1])
 print("Distance: " + str(dist) + " TDRL/iTDRL")
+if args.identity:
+    print()
+    print("(relabeled) Permutation_" + str(dist) + ": ", end="")
+    pprint_perm(composition(identity, permutation))
+    print("MISC-Encoding: ", end="")
+    print("".join([_[0] for _ in get_misc_dec(composition(identity, permutation))]))
 print()
 print("------------------------------------------")
 
@@ -116,9 +123,22 @@ while dist != 0:
     # print("".join([x[0] for x in misc_dec]))
     print("Pattern      : ", end="")
     print(trns[1])
-    print(trns[2] + " γ_" + str(dist+1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
-    print("Permutation_" + str(dist+1) + " = " + "γ_" + str(dist+1) + " ∘ " + "Permutation_" + str(dist))
+    print(trns[2] + " γ_" + str(dist + 1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
+    print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " ∘ " + "Permutation_" + str(dist))
     print("Distance: " + str(dist) + " TDRL/iTDRL")
+    if args.identity:
+        print()
+        print("(relabeled) Permutation_" + str(dist) + ": ", end="")
+        pprint_perm(composition(identity, trns[0]))
+        print("MISC-Encoding: ", end="")
+        print("".join([_[0] for _ in get_misc_dec(composition(identity, trns[0]))]))
+        l_perm = [int(_) for _ in trns[3].strip().split(" ")]
+        r_perm = [int(_) for _ in trns[4].strip().split(" ")]
+        comp = composition(identity, l_perm+r_perm)
+        left = comp[0:len(l_perm)]
+        right = comp[len(l_perm):len(comp)]
+        print("(relabeled) " +  trns[2] + " γ_" + str(dist + 1) + ": " +
+              "( " + stringify(left) + " | " + stringify(right) + " )")
     print()
     print("------------------------------------------")
     if dist != 0:
@@ -134,8 +154,6 @@ while dist != 0:
             pattern = ("riTDRL", pat)
         else:
             pattern = ("TDRL", pat)
-
-# TODO: IMPLEMENT MAPPING BACK OUTPUT IN CASE THE IDENTITY IS SPECIFIED.
 
 t2 = time.time()
 print("Sorting Scenario computed in " + str(t2 - t1) + "s.")

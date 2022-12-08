@@ -250,15 +250,22 @@ def oplus(misc_1, misc_2):
 
 def inverse(perm):
     inv_perm = [0 for _ in perm]
+
     for x in range(0, len(perm)):
-        inv_perm[perm[x] - 1] = x + 1
+        if(perm[x]>0):
+            inv_perm[perm[x] - 1] = x + 1
+        else:
+            inv_perm[-perm[x] - 1] = -x - 1
     return inv_perm
 
 
 def composition(p1, p2):
     comp_perm = [0 for _ in p1]
     for x in range(0, len(p2)):
-        comp_perm[x] = p1[p2[x] - 1]
+        if 0 < p2[x]:
+            comp_perm[x] = p1[p2[x] - 1]
+        else:
+            comp_perm[x] = -p1[-p2[x] - 1]
     return comp_perm
 
 
