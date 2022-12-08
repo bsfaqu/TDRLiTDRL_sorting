@@ -5,15 +5,17 @@ from numpy.random import permutation as rand_perm
 import random
 import time
 
+
 cli_parser = argparse.ArgumentParser()
 
 cli_parser.add_argument("-r", "--random", type=int, help="randomly generate a permutation;" +
                                                          "\nspecify length as argument.")
 cli_parser.add_argument("-p", "--permutation", help="space separated target permutation, " +
-                                                    "\ni.e. 3 1 2 -4 -5 -6 7 8. ")
+                                                    "\ni.e. 3 1 2 -4 -5 -6 7 8. ", nargs="+")
 cli_parser.add_argument("-i", "--identity", help="space separated identity permutation, " +
                                                  "\ni.e. 1 2 3 4 5 6 7 8. \nThis argument is ignored if " +
-                                                 "-p/--permutation is not set.")
+                                                 "-p/--permutation is not set.", nargs="+")
+cli_parser.add_argument("-t", "--tabular", action="store_true", help="switches output to tabular")
 args = cli_parser.parse_args()
 
 permutation = []
@@ -22,8 +24,7 @@ identity = []
 # Either take the input permutation, generate a random permutation, or default
 # to a permutation containing 37 elements in case neither -p nor -r are set.
 if args.permutation:
-    split = args.permutation.split(" ")
-    permutation = [int(x) for x in split]
+    permutation = [int(x) for x in args.permutation]
 elif args.random:
     permutation = list(rand_perm(args.random))
 
@@ -44,16 +45,12 @@ else:
 # If an identity permutation is specified, we alter the input permutation such
 # that the output is for optimally sorting identity -> permutation
 if args.identity:
-    if args.permutation:
-        split = args.identity.split(" ")
-        identity = [int(x) for x in split]
+    identity = [int(x) for x in args.identity]
 
-        # TODO: MAKE INVERSION WORK FOR NEGATIVE ELEMENTS
-
-        # To sort identity to pi we apply the inverse of identity to pi
-        # (and the identity itself).
-        inv_identity = inverse(identity)
-        permutation = composition(inv_identity, permutation)
+    # To sort identity to pi we apply the inverse of identity to pi
+    # (and the identity itself).
+    inv_identity = inverse(identity)
+    permutation = composition(inv_identity, permutation)
 
 t1 = time.time()
 
@@ -88,66 +85,64 @@ if dist == -1:
             pattern = p
             break
 
-print()
-print()
-print("Permutation_" + str(dist) + ": ", end="")
-pprint_perm(permutation)
-print("MISC-Encoding: ", end="")
-# print("".join([x[0] for x in misc_dec]))
-pprint_misc_enc(misc_dec, subseq_map, len(pattern[1]))
-print("Pattern      : ", end="")
-print(pattern[1])
-print("Distance: " + str(dist) + " TDRL/iTDRL")
-if args.identity:
-    print()
-    print("(relabeled) Permutation_" + str(dist) + ": ", end="")
-    pprint_perm(composition(identity, permutation))
-    print("MISC-Encoding: ", end="")
-    print("".join([_[0] for _ in get_misc_dec(composition(identity, permutation))]))
-print()
-print("------------------------------------------")
+# Initial output for tabular and verbose
+if args.tabular:
+    print("Permutation_k" + "\t" + "TDRL/iTDRL" + "\t" + "γ_k")
 
-while dist != 0:
-    misc_dec = get_misc_dec(permutation)
-    subseq_map = subseq_mapping(misc_dec, pattern[1])
-    trns = transformation(permutation, pattern, misc_dec, subseq_map)
-    dist = dist - 1
-    permutation = trns[0]
+    if args.identity:
+        # Output relabeled permutation
+        pprint_perm(composition(identity, permutation), endl=False)
+        print("\t", end="")
+    else:
+        pprint_perm(permutation, endl=False)
+        print("\t", end="")
+
+else:
+    # Verbose output for input permutation
+    print()
+    print()
+
+    print("Distance: " + str(dist) + " TDRL/iTDRL")
+    print("----------------------")
+
     print()
     print("Permutation_" + str(dist) + ": ", end="")
-    pprint_perm(trns[0])
+    pprint_perm(permutation)
+
     print("MISC-Encoding: ", end="")
-    misc_dec = get_misc_dec(permutation)
-    subseq_map = subseq_mapping(misc_dec, pattern[1])
-    pprint_misc_enc(misc_dec, subseq_map, len(trns[1]))
-    # print("".join([x[0] for x in misc_dec]))
+    pprint_misc_enc(misc_dec, subseq_map, len(pattern[1]))
+
     print("Pattern      : ", end="")
-    print(trns[1])
-    print(trns[2] + " γ_" + str(dist + 1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
-    print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " ∘ " + "Permutation_" + str(dist))
-    print("Distance: " + str(dist) + " TDRL/iTDRL")
+    print(pattern[1])
+
     if args.identity:
-        print()
+        # Output relabeled permutation
         print("(relabeled) Permutation_" + str(dist) + ": ", end="")
-        pprint_perm(composition(identity, trns[0]))
+        pprint_perm(composition(identity, permutation))
+
         print("MISC-Encoding: ", end="")
-        print("".join([_[0] for _ in get_misc_dec(composition(identity, trns[0]))]))
-        l_perm = [int(_) for _ in trns[3].strip().split(" ")]
-        r_perm = [int(_) for _ in trns[4].strip().split(" ")]
-        comp = composition(identity, l_perm+r_perm)
-        left = comp[0:len(l_perm)]
-        right = comp[len(l_perm):len(comp)]
-        print("(relabeled) " +  trns[2] + " γ_" + str(dist + 1) + ": " +
-              "( " + stringify(left) + " | " + stringify(right) + " )")
-    print()
-    print("------------------------------------------")
+        print("".join([_[0] for _ in get_misc_dec(composition(identity, permutation))]))
+
+# Sorting the identity into permutation
+while dist != 0:
+
+    # Compute the transformation T(permutation, pattern);
+    # trns = (permutation, pattern, operation, L, R)
+    trns = transformation(permutation, pattern, misc_dec, subseq_map)
+    dist = dist - 1
+
+    # assign permutation and misc_dec for next transformation
+    permutation = trns[0]
+    misc_dec = get_misc_dec(permutation)
+
+    # Derive the next pattern
     if dist != 0:
         pat = trns[1]
         first = pat[0]
         last = pat[-1]
         mid = pat[int(len(pat) / 2)]
 
-        # Derive the type of the next pattern.
+        # Derive the type of the next pattern by examining the characters at the beginning, the middle, and end.
         if first == "n" and last == "p" and mid == "p":
             pattern = ("liTDRL", pat)
         elif first == "p" and last == "n" and mid == "n":
@@ -155,5 +150,76 @@ while dist != 0:
         else:
             pattern = ("TDRL", pat)
 
-t2 = time.time()
-print("Sorting Scenario computed in " + str(t2 - t1) + "s.")
+    # Get next subsequence mapping between misc_dec and pattern
+    subseq_map = subseq_mapping(misc_dec, pattern[1])
+
+    if args.tabular:
+
+        if args.identity:
+            # L and R are concatenated so that we can relabel them by identity * LR
+            l_perm = [int(_) for _ in trns[3].strip().split(" ")]
+            r_perm = [int(_) for _ in trns[4].strip().split(" ")]
+            comp = composition(identity, l_perm + r_perm)
+            left = comp[0:len(l_perm)]
+            right = comp[len(l_perm):len(comp)]
+
+            print(trns[2] + "\t" + "( " + stringify(left) + " | " + stringify(right) + " )")
+
+            pprint_perm(composition(identity, trns[0]), endl=False)
+            print("\t", end="")
+        else:
+            print(trns[2] + "\t" + "( " + trns[3] + " | " + trns[4] + " )")
+            pprint_perm(permutation, endl=False)
+            print("\t", end="")
+
+    else:
+        print()
+        print(trns[2] + " γ_" + str(dist + 1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
+
+        if args.identity:
+            # L and R are concatenated so that we can relabel them by identity * LR
+            l_perm = [int(_) for _ in trns[3].strip().split(" ")]
+            r_perm = [int(_) for _ in trns[4].strip().split(" ")]
+            comp = composition(identity, l_perm+r_perm)
+            left = comp[0:len(l_perm)]
+            right = comp[len(l_perm):len(comp)]
+
+            print("(relabeled) " + trns[2] + " γ_" + str(dist + 1) + ": " +
+                  "( " + stringify(left) + " | " + stringify(right) + " )")
+
+        print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " ∘ " + "Permutation_" + str(dist))
+        print("------------------------------------------")
+
+        # Verbose output
+        print()
+        # print("Distance: " + str(dist) + " TDRL/iTDRL")
+        print("Permutation_" + str(dist) + ": ", end="")
+        pprint_perm(permutation)
+
+        print("MISC-Encoding: ", end="")
+        pprint_misc_enc(misc_dec, subseq_map, len(trns[1]))
+
+        print("Pattern      : ", end="")
+        print(trns[1])
+
+        # For the case that a different identity is specified, we relabel the output back to the original permutations.
+        if args.identity:
+
+            # Since we set permutation = identity^-1 * permutation at the beginning, we relabel by identity * permutation.
+            print("(relabeled) Permutation_" + str(dist) + ": ", end="")
+            pprint_perm(composition(identity, trns[0]))
+
+            # We recompute the misc-decomposition of the relabeled permutation
+            print("MISC-Encoding: ", end="")
+            print("".join([_[0] for _ in get_misc_dec(composition(identity, trns[0]))]))
+
+if args.tabular:
+    print(" ")
+else:
+    print()
+    print("------------------------------------------")
+
+# Output runtime
+if not args.tabular:
+    t2 = time.time()
+    print("Sorting Scenario computed in " + str(t2 - t1) + "s.")

@@ -458,7 +458,7 @@ def transformation(permutation, pattern, misc_dec, misc_mapping):
     return taus, newpat, pattern[0], L, R
 
 
-def pprint_perm(permutation):
+def pprint_perm(permutation, endl=True):
     """
     Returns the canonical one-line representation for a permutation represented
     by a list.
@@ -475,7 +475,10 @@ def pprint_perm(permutation):
     str
         Canonical one-line representation of the permutation.
     """
-    print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )")
+    if(endl):
+        print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )")
+    else:
+        print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )", end="")
 
 def pprint_misc_enc(misc_encoding, misc_mapping,pattern_length):
     print_string = ""
