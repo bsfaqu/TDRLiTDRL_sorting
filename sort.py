@@ -119,8 +119,9 @@ else:
 
         # Since we set permutation = identity^-1 * permutation at the beginning,
         # we relabel by identity * permutation.
-        print("(relabeled) Permutation_" + str(dist) + ": ", end="")
-        pprint_perm(composition(identity, permutation))
+        print("Permutation_" + str(dist) + ": ", end="")
+        pprint_perm(composition(identity, permutation), endl=False)
+        print(" (relabeled)")
 
         print("MISC-Encoding: ", end="")
         print("".join([_[0] for _ in get_misc_dec(composition(identity, permutation))]))
@@ -195,10 +196,11 @@ while dist != 0:
             right = comp[len(l_perm):len(comp)]
 
             # Outputs TDRL/iTDRL : (L|R) for relabeled L and R
-            print("(relabeled) " + trns[2] + " γ_" + str(dist + 1) + ": " +
-                  "( " + stringify(left) + " | " + stringify(right) + " )")
+            print( trns[2] + " γ_" + str(dist + 1) + ": " +
+                  "( " + stringify(left) + " | " + stringify(right) + " )" + " (relabeled) ")
 
-        print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " ∘ " + "Permutation_" + str(dist))
+        print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " * " + "Permutation_" + str(dist))
+        print()
         print("------------------------------------------")
 
         # Output for permutation_k
@@ -217,8 +219,9 @@ while dist != 0:
 
             # Since we set permutation = identity^-1 * permutation at the beginning,
             # we relabel by identity * permutation.
-            print("(relabeled) Permutation_" + str(dist) + ": ", end="")
-            pprint_perm(composition(identity, trns[0]))
+            print("Permutation_" + str(dist) + ": ", end="")
+            pprint_perm(composition(identity, trns[0]),endl=False)
+            print(" (relabeled)")
 
             # We recompute the misc-decomposition of the relabeled permutation
             print("MISC-Encoding: ", end="")
