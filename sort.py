@@ -116,7 +116,9 @@ else:
     print(pattern[1])
 
     if args.identity:
-        # Output relabeled permutation
+
+        # Since we set permutation = identity^-1 * permutation at the beginning,
+        # we relabel by identity * permutation.
         print("(relabeled) Permutation_" + str(dist) + ": ", end="")
         pprint_perm(composition(identity, permutation))
 
@@ -153,6 +155,8 @@ while dist != 0:
     # Get next subsequence mapping between misc_dec and pattern
     subseq_map = subseq_mapping(misc_dec, pattern[1])
 
+
+    # Tabular Output.
     if args.tabular:
 
         if args.identity:
@@ -172,8 +176,14 @@ while dist != 0:
             pprint_perm(permutation, endl=False)
             print("\t", end="")
 
+    # Verbose Output.
     else:
+
+        # Outputs the last part of a verbose output cell for permutation_k+1
+        # i.e. the TDRL/iTDLR γ_k+1 which creates permutation_k+1 from current permutation_k
         print()
+
+        # Outputs TDRL/iTDRL : (L|R)
         print(trns[2] + " γ_" + str(dist + 1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
 
         if args.identity:
@@ -184,15 +194,15 @@ while dist != 0:
             left = comp[0:len(l_perm)]
             right = comp[len(l_perm):len(comp)]
 
+            # Outputs TDRL/iTDRL : (L|R) for relabeled L and R
             print("(relabeled) " + trns[2] + " γ_" + str(dist + 1) + ": " +
                   "( " + stringify(left) + " | " + stringify(right) + " )")
 
         print("Permutation_" + str(dist + 1) + " = " + "γ_" + str(dist + 1) + " ∘ " + "Permutation_" + str(dist))
         print("------------------------------------------")
 
-        # Verbose output
+        # Output for permutation_k
         print()
-        # print("Distance: " + str(dist) + " TDRL/iTDRL")
         print("Permutation_" + str(dist) + ": ", end="")
         pprint_perm(permutation)
 
@@ -205,7 +215,8 @@ while dist != 0:
         # For the case that a different identity is specified, we relabel the output back to the original permutations.
         if args.identity:
 
-            # Since we set permutation = identity^-1 * permutation at the beginning, we relabel by identity * permutation.
+            # Since we set permutation = identity^-1 * permutation at the beginning,
+            # we relabel by identity * permutation.
             print("(relabeled) Permutation_" + str(dist) + ": ", end="")
             pprint_perm(composition(identity, trns[0]))
 
@@ -213,13 +224,13 @@ while dist != 0:
             print("MISC-Encoding: ", end="")
             print("".join([_[0] for _ in get_misc_dec(composition(identity, trns[0]))]))
 
+# Fill last line of table.
 if args.tabular:
-    print(" ")
+    print("\t\t")
+
+# Print last separator and runtime.
 else:
     print()
     print("------------------------------------------")
-
-# Output runtime
-if not args.tabular:
     t2 = time.time()
     print("Sorting Scenario computed in " + str(t2 - t1) + "s.")

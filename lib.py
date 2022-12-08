@@ -249,6 +249,21 @@ def oplus(misc_1, misc_2):
 
 
 def inverse(perm):
+    """
+    Implements the inversion of a permutations.
+
+
+
+    Parameters
+    ----------
+    perm: list
+        List of integers which represents a string of integers, or a permutation
+
+    Returns
+    -------
+    list
+        Inverse of perm.
+    """
     inv_perm = [0 for _ in perm]
 
     for x in range(0, len(perm)):
@@ -260,6 +275,23 @@ def inverse(perm):
 
 
 def composition(p1, p2):
+    """
+    Implements the composition of two permutations.
+
+
+
+    Parameters
+    ----------
+    p1: list
+        List of integers which represents a string of integers, or a permutation
+    p2: list
+        List of integers which represents a string of integers, or a permutation
+
+    Returns
+    -------
+    list
+        Composition of p1 * p2.
+    """
     comp_perm = [0 for _ in p1]
     for x in range(0, len(p2)):
         if 0 < p2[x]:
@@ -331,6 +363,7 @@ def transformation(permutation, pattern, misc_dec, misc_mapping):
         - TDRL for patterns satisfying pattern Definition (i) or (iv)
         - riTDRL for patterns satisfying pattern Definition (ii)
         - liTDRL for patterns satisfying pattern Definition (iii)
+        and the string that represents the pattern.
     misc_dec: list
         A List of tuples that represent the misc-decomposition and misc-encoding of
         permutation. Can be acquired via get_misc_dec(permutation).
@@ -460,7 +493,7 @@ def transformation(permutation, pattern, misc_dec, misc_mapping):
 
 def pprint_perm(permutation, endl=True):
     """
-    Returns the canonical one-line representation for a permutation represented
+    Prints the canonical one-line representation for a permutation represented
     by a list.
 
 
@@ -472,8 +505,7 @@ def pprint_perm(permutation, endl=True):
 
     Returns
     -------
-    str
-        Canonical one-line representation of the permutation.
+
     """
     if(endl):
         print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )")
@@ -481,6 +513,31 @@ def pprint_perm(permutation, endl=True):
         print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )", end="")
 
 def pprint_misc_enc(misc_encoding, misc_mapping,pattern_length):
+    """
+    Prints a subsequence aware, i.e. aligned misc-encoding.
+
+    The alignment, i.e. subsequence matching between a misc-encoding and a pattern is printed
+    such that pattern and misc-encoding can be visualized together e.g.
+    permutation: p nnp n
+    pattern:     ppnnppnn
+
+    Parameters
+    ----------
+    pattern: str
+        String that represents a pattern
+    misc_dec: list
+        A List of tuples that represent the misc-decomposition and misc-encoding of
+        permutation. Can be acquired via get_misc_dec(permutation).
+    misc_mapping:
+        Dictionary which maps each character in pattern[1] to a character in the
+        misc-encoding of permutation.
+    pattern_length:
+        Length of paramter pattern.
+    Returns
+    -------
+    str
+        Canonical one-line representation of the permutation.
+    """
     print_string = ""
     keys = misc_mapping.keys()
     for i in range(pattern_length):
