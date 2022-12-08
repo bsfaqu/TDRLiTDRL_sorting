@@ -65,6 +65,7 @@ subseq_map = {}
 dist = -1
 pattern = ""
 
+# for the case that d(identity,permutation) is k
 for p in patterns:
     subseq_map = subseq_mapping(misc_dec, p[1])
     if len(subseq_map) == 0:
@@ -73,6 +74,8 @@ for p in patterns:
         dist = k
         pattern = p
         break
+
+# for the case that d(identity,permutation) is k+1
 if dist == -1:
     dist = k + 1
     patterns = get_patterns(dist)
@@ -83,31 +86,45 @@ if dist == -1:
         else:
             pattern = p
             break
+
 print()
 print()
-print("Input Permutation: ", end="")
+print("Permutation_" + str(dist) + ": ", end="")
 pprint_perm(permutation)
 print("MISC-Encoding: ", end="")
 print("".join([x[0] for x in misc_dec]))
 print("Subsequence of pattern: ", end="")
 print(pattern[1])
 print("Distance: " + str(dist) + " TDRL/iTDRL")
-print("*********************************************")
+print()
+print("------------------------------------------")
+
 while dist != 0:
     misc_dec = get_misc_dec(permutation)
     subseq_map = subseq_mapping(misc_dec, pattern[1])
     trns = transformation(permutation, pattern, misc_dec, subseq_map)
     dist = dist - 1
-    pprint_perm(trns[0])
-    print(trns[1])
-    print(trns[2] + ": " + "( " + trns[3] + " | " + trns[4] + " )")
-    print("*********************************************")
     permutation = trns[0]
+    print()
+    print("Permutation_" + str(dist) + ": ", end="")
+    pprint_perm(trns[0])
+    print("MISC-Encoding: ", end="")
+    misc_dec = get_misc_dec(permutation)
+    print("".join([x[0] for x in misc_dec]))
+    print("Subsequence of pattern: ", end="")
+    print(trns[1])
+    print(trns[2] + " γ_" + str(dist+1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
+    print("Permutation_" + str(dist+1) + " = " + "γ_" + str(dist+1) + " ∘ " + "Permutation_" + str(dist))
+    print("Distance: " + str(dist) + " TDRL/iTDRL")
+    print()
+    print("------------------------------------------")
     if dist != 0:
         pat = trns[1]
         first = pat[0]
         last = pat[-1]
         mid = pat[int(len(pat) / 2)]
+
+        # Derive the type of the next pattern
         if first == "n" and last == "p" and mid == "p":
             pattern = ("liTDRL", pat)
         elif first == "p" and last == "n" and mid == "n":
