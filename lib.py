@@ -469,3 +469,13 @@ def pprint_perm(permutation):
         Canonical one-line representation of the permutation.
     """
     print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )")
+
+def pprint_misc_enc(misc_encoding, misc_mapping,pattern_length):
+    print_string = ""
+    keys = misc_mapping.keys()
+    for i in range(pattern_length):
+        if i in keys:
+            print_string += misc_encoding[misc_mapping[i]][0]
+        else:
+            print_string += " "
+    print(print_string)

@@ -92,8 +92,9 @@ print()
 print("Permutation_" + str(dist) + ": ", end="")
 pprint_perm(permutation)
 print("MISC-Encoding: ", end="")
-print("".join([x[0] for x in misc_dec]))
-print("Subsequence of pattern: ", end="")
+# print("".join([x[0] for x in misc_dec]))
+pprint_misc_enc(misc_dec,subseq_map,len(pattern[1]))
+print("Pattern      : ", end="")
 print(pattern[1])
 print("Distance: " + str(dist) + " TDRL/iTDRL")
 print()
@@ -110,8 +111,10 @@ while dist != 0:
     pprint_perm(trns[0])
     print("MISC-Encoding: ", end="")
     misc_dec = get_misc_dec(permutation)
-    print("".join([x[0] for x in misc_dec]))
-    print("Subsequence of pattern: ", end="")
+    subseq_map = subseq_mapping(misc_dec, pattern[1])
+    pprint_misc_enc(misc_dec, subseq_map, len(trns[1]))
+    # print("".join([x[0] for x in misc_dec]))
+    print("Pattern      : ", end="")
     print(trns[1])
     print(trns[2] + " γ_" + str(dist+1) + ": " + "( " + trns[3] + " | " + trns[4] + " )")
     print("Permutation_" + str(dist+1) + " = " + "γ_" + str(dist+1) + " ∘ " + "Permutation_" + str(dist))
@@ -124,7 +127,7 @@ while dist != 0:
         last = pat[-1]
         mid = pat[int(len(pat) / 2)]
 
-        # Derive the type of the next pattern
+        # Derive the type of the next pattern.
         if first == "n" and last == "p" and mid == "p":
             pattern = ("liTDRL", pat)
         elif first == "p" and last == "n" and mid == "n":
@@ -135,4 +138,4 @@ while dist != 0:
 # TODO: IMPLEMENT MAPPING BACK OUTPUT IN CASE THE IDENTITY IS SPECIFIED.
 
 t2 = time.time()
-print("Sorting Scenario calculated in " + str(t2 - t1) + "s.")
+print("Sorting Scenario computed in " + str(t2 - t1) + "s.")
