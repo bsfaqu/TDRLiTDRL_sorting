@@ -1,8 +1,5 @@
 import json
-from math import log2,ceil
-from numpy.random import permutation as rand_perm
-import random
-import time
+
 
 def get_misc_dec(permutation):
     """
@@ -26,52 +23,53 @@ def get_misc_dec(permutation):
         by position of the misc-substrings in the input permutation. List indices
         can be immediately sliced, hence start is the first element which is in
         the corresponding misc-substring, and end is the first element which
-        isnt contained in the substring anymore, or len(permutation).
+        is not contained in the substring anymore, or len(permutation).
     """
 
-    misc_dec=[]
+    misc_dec = []
 
     # Beginning of current misc
-    last_boundary=0
+    last_boundary = 0
 
     # Last element seen
-    last_element=permutation[0]
+    last_element = permutation[0]
 
-    for i in range(1,len(permutation)):
+    for i in range(1, len(permutation)):
 
         # Check if the border of a new misc is reached
-        if(last_element>permutation[i] or last_element*permutation[i]<0 or i==len(permutation)-1):
+        if last_element > permutation[i] or last_element * permutation[i] < 0 or i == len(permutation) - 1:
 
-            # Decide whether its a positive, or a negative misc
-            if(last_element>0):
-                misc_dec+=[("p",last_boundary,i)]
-                last_boundary=i
+            # Decide whether it's a positive, or a negative misc
+            if last_element > 0:
+                misc_dec += [("p", last_boundary, i)]
+                last_boundary = i
             else:
-                misc_dec+=[("n",last_boundary,i)]
-                last_boundary=i
+                misc_dec += [("n", last_boundary, i)]
+                last_boundary = i
 
         # Check whether the last element constitutes an individual misc
-        if(i==len(permutation)-1):
-            if(last_element>permutation[i] or last_element*permutation[i]<0):
-                if(permutation[i]>0):
-                    misc_dec+=[("p",last_boundary,i)]
+        if i == len(permutation) - 1:
+            if last_element > permutation[i] or last_element * permutation[i] < 0:
+                if permutation[i] > 0:
+                    misc_dec += [("p", last_boundary, i)]
                 else:
-                    misc_dec+=[("n",last_boundary,i)]
+                    misc_dec += [("n", last_boundary, i)]
 
         # Remember last seen element
-        last_element=permutation[i]
+        last_element = permutation[i]
 
     # adjust last index for easier slicing in transformation
-    misc_dec[-1]=(misc_dec[-1][0],misc_dec[-1][1],misc_dec[-1][2]+1)
+    misc_dec[-1] = (misc_dec[-1][0], misc_dec[-1][1], misc_dec[-1][2] + 1)
 
     return misc_dec
+
 
 def get_patterns(k):
     """
     Computes all patterns of length 2^k.
 
     Checks whether a file containing patterns of length 2^k exist, and if it
-    doesnt, computes all patterns up to length 2^k. A list containing all
+    doesn't, computes all patterns up to length 2^k. A list containing all
     patterns length 2^k is returned.
 
     Parameters
@@ -88,65 +86,66 @@ def get_patterns(k):
         ... , then patterns that satisfy pattern Definition (iv).
     """
 
-    ## TODO: RECURSIVELY GENERATE PATTERNS FOR k-1,...,1 IF PATTERNS FOR k ARE
-    ## NOT AVAILIABLE. --> GENERATE FILES FOR MISSING PATTERNS
-    if(k == 0):
+    # TODO: RECURSIVELY GENERATE PATTERNS FOR k-1,...,1 IF PATTERNS FOR k ARE
+    # NOT AVAILABLE. --> GENERATE FILES FOR MISSING PATTERNS
+    if k == 0:
         return []
 
     # Test whether a file containing all patterns of length 2^k exists
     try:
-        with open("pattern_"+str(k)+".txt","r") as patfile:
-            patterns=json.load(patfile)
+        with open("pattern_" + str(k) + ".txt", "r") as patfile:
+            patterns = json.load(patfile)
             return patterns
-    except:
-        print("Patterns for k=" + str(k) + " not avaliable.")
+    except FileNotFoundError:
+        print("Patterns for k=" + str(k) + " not available.")
         print("Pattern file pattern_" + str(k) + " will be created.")
 
-    patterns={}
+    patterns = {}
 
     # Generate all patterns up to length 2^k
-    for i in range(1,k+1):
+    for i in range(1, k + 1):
 
-        patterns[i]=[]
+        patterns[i] = []
 
         # length of pattern, middle of pattern
-        l=2**i
-        l_half=int(l/2)
+        l_full = 2 ** i
+        l_half = int(l_full / 2)
 
-        pos,negpos,posneg,reppat="","","",""
+        pos, negpos, posneg, reppat = "", "", "", ""
 
         # Pattern Definition (i)
-        pos=pos.join(["p" for x in range(0,l)])
+        pos = pos.join(["p" for _ in range(0, l_full)])
 
         # Pattern Definition (iii)
-        negpos+="".join(["n" for x in range(0,l_half)])
-        negpos+="".join(["p" for x in range(0,l_half)])
+        negpos += "".join(["n" for _ in range(0, l_half)])
+        negpos += "".join(["p" for _ in range(0, l_half)])
 
         # Pattern Definition (ii)
-        posneg+="".join(["p" for x in range(0,l_half)])
-        posneg+="".join(["n" for x in range(0,l_half)])
+        posneg += "".join(["p" for _ in range(0, l_half)])
+        posneg += "".join(["n" for _ in range(0, l_half)])
 
-        patterns[i]+=[("TDRL",pos),("riTDRL",posneg),("liTDRL",negpos)]
+        patterns[i] += [("TDRL", pos), ("riTDRL", posneg), ("liTDRL", negpos)]
 
         # Pattern Definition (iv)
-        if(i==1):
+        if i == 1:
             continue
         else:
-            for pat in patterns[i-1]:
-                if(pat[1][0]=="p" and pat[1][-1]=="p"):
+            for pat in patterns[i - 1]:
+                if pat[1][0] == "p" and pat[1][-1] == "p":
                     continue
                 reppat += pat[1]
                 reppat += pat[1]
-                patterns[i]+=[("TDRL",reppat)]
-                reppat=""
+                patterns[i] += [("TDRL", reppat)]
+                reppat = ""
 
     # Save patterns of length 2^k to file pattern_k.txt
-    with open("pattern_"+str(k)+".txt","w+") as patfile:
-        json.dump(patterns[k],patfile)
+    with open("pattern_" + str(k) + ".txt", "w+") as patfile:
+        json.dump(patterns[k], patfile)
 
     return patterns[k]
 
-def subseq_mapping(misc_dec,pattern):
+
+def subseq_mapping(misc_dec, pattern):
     """
     Returns a subsequence mapping between a misc-decomposition and a pattern.
 
@@ -160,8 +159,10 @@ def subseq_mapping(misc_dec,pattern):
         List of tuples which correspond to the misc-substrings of a permutation.
         It is expected that the first value of each tuple contains the corresponding
         character of a permutations misc-encoding, i.e. p/n. Tuples encoding the
-        misc-substrings of a permutation have to be ordered by their occurence
+        misc-substrings of a permutation have to be ordered by their occurrence
         in the permutation.
+    pattern:
+        String representing a pattern.
 
     Returns
     -------
@@ -170,29 +171,30 @@ def subseq_mapping(misc_dec,pattern):
         no mapping can be found, i.e. the misc-encoding is not subsequence of
         pattern, an empty dictionary is returned.
     """
-    mapping={}
+    mapping = {}
 
     # Index of last seen character in pattern
-    last_index_pattern=0
+    last_index_pattern = 0
 
     # Pass over misc_dec once and search for the next matching character in pattern
-    for i in range(0,len(misc_dec)):
+    for i in range(0, len(misc_dec)):
 
         # Iteration starts from the last checked character in pattern.
-        for j in range(last_index_pattern,len(pattern)):
-            if(misc_dec[i][0]==pattern[j]):
-                mapping[j]=i
-                last_index_pattern=j+1
+        for j in range(last_index_pattern, len(pattern)):
+            if misc_dec[i][0] == pattern[j]:
+                mapping[j] = i
+                last_index_pattern = j + 1
                 break
 
     # Check if subsequence mapping is incomplete, i.e. misc_dec is not
     # subsequence of pattern.
-    if(len(mapping)!=len(misc_dec)):
+    if len(mapping) != len(misc_dec):
         return {}
 
     return mapping
 
-def oplus(misc_1,misc_2):
+
+def oplus(misc_1, misc_2):
     """
     Implements the merge and lexicographically sort function
 
@@ -214,48 +216,51 @@ def oplus(misc_1,misc_2):
         elements from misc_1 and misc_2
     """
 
-    merge_misc=[]
+    merge_misc = []
 
     # Stores the current position in misc_1 and misc_2
-    index_1=0
-    index_2=0
+    index_1 = 0
+    index_2 = 0
 
     # Merges misc_1 and misc_2 similarly to the mergesort merge.
-    while len(merge_misc)!=len(misc_1)+len(misc_2):
+    while len(merge_misc) != len(misc_1) + len(misc_2):
 
         # End of misc_1 reached.
-        if(index_1>=len(misc_1)):
-            merge_misc+=[misc_2[index_2]]
-            index_2+=1
+        if index_1 >= len(misc_1):
+            merge_misc += [misc_2[index_2]]
+            index_2 += 1
 
         # End of misc_2 reached.
-        elif(index_2>=len(misc_2)):
-            merge_misc+=[misc_1[index_1]]
-            index_1+=1
+        elif index_2 >= len(misc_2):
+            merge_misc += [misc_1[index_1]]
+            index_1 += 1
 
         # Next element is in misc_1
-        elif(misc_1[index_1]<misc_2[index_2]):
-            merge_misc+=[misc_1[index_1]]
-            index_1+=1
+        elif misc_1[index_1] < misc_2[index_2]:
+            merge_misc += [misc_1[index_1]]
+            index_1 += 1
 
         # Last case - next element is in misc_2
         else:
-            merge_misc+=[misc_2[index_2]]
-            index_2+=1
+            merge_misc += [misc_2[index_2]]
+            index_2 += 1
 
     return merge_misc
 
+
 def inverse(perm):
-    inv_perm = [0 for x in perm]
+    inv_perm = [0 for _ in perm]
     for x in range(0, len(perm)):
         inv_perm[perm[x] - 1] = x + 1
     return inv_perm
 
+
 def composition(p1, p2):
-    comp_perm = [0 for x in p1]
+    comp_perm = [0 for _ in p1]
     for x in range(0, len(p2)):
         comp_perm[x] = p1[p2[x] - 1]
     return comp_perm
+
 
 def reverse(permutation):
     """
@@ -267,7 +272,7 @@ def reverse(permutation):
 
     Parameters
     ----------
-    string: list
+    permutation: list
         List of integers which represents a string of integers, or a permutation
 
     Returns
@@ -275,29 +280,32 @@ def reverse(permutation):
     list
         List in which the order and signage of the input list is reversed.
     """
-    return [-1*permutation[-i] for i in range(1,len(permutation)+1)]
+    return [-1 * permutation[-i] for i in range(1, len(permutation) + 1)]
 
-def stringify(l):
+
+def stringify(permutation):
     """
     Returns a string representation for a list (of integers, or any datatype
-    which posesses a str() representation)
+    which possesses a str() representation)
 
-    Every element in the returned string is seperated by a space.
+    Every element in the returned string is separated by a space.
 
     Parameters
     ----------
-    l: list
-        List which should be stringified, i.e., which shall be represented
-        as a space-seperated string.
+    permutation: list
+        List which should be stringifies, i.e., which shall be represented
+        as a space-separated string.
 
     Returns
     -------
     str
         String representation of l.
     """
-    return "".join([str(x)+" " for x in l])
+    return "".join([str(x) + " " for x in permutation])
 
-def transformation(permutation,pattern,misc_dec,misc_mapping):
+
+# noinspection PyPep8Naming
+def transformation(permutation, pattern, misc_dec, misc_mapping):
     """
     Implements transformation T.
 
@@ -312,15 +320,15 @@ def transformation(permutation,pattern,misc_dec,misc_mapping):
         List representation of a permutation of the elements [1:n] which contains
         every element exactly once.
     pattern: tuple
-        tuple that contains the type of pattern, i.e.
+        A tuple that contains the type of pattern, i.e.
         - TDRL for patterns satisfying pattern Definition (i) or (iv)
         - riTDRL for patterns satisfying pattern Definition (ii)
         - liTDRL for patterns satisfying pattern Definition (iii)
     misc_dec: list
-        List of tuples that represent the misc-decomposition and misc-encoding of
+        A List of tuples that represent the misc-decomposition and misc-encoding of
         permutation. Can be acquired via get_misc_dec(permutation).
     misc_mapping:
-        Dictionary which maps each charater in pattern[1] to a character in the
+        Dictionary which maps each character in pattern[1] to a character in the
         misc-encoding of permutation.
     Returns
     -------
@@ -329,7 +337,7 @@ def transformation(permutation,pattern,misc_dec,misc_mapping):
         Additional information like the next pattern, and the TDRL/iTDRL which
         inverts T is included as well. The tuple has the shape
         (permutation_after_T, nextpattern, TDRL/iTDRL, L, R).
-        permutation_after_T is the permutation after the applciation of T.
+        permutation_after_T is the permutation after the application of T.
         nextpattern is the pattern the misc-dec of permutation_after_T is subsequence of.
         TDRL/iTDRL is a string which encodes the operation which reverses T, i.e.
         "TDRL", "liTDRL", or "riTDRL"
@@ -338,110 +346,110 @@ def transformation(permutation,pattern,misc_dec,misc_mapping):
     """
 
     # Contains the permutation after application of T
-    taus=[]
-    newpat=""
+    taus = []
+    newpat = ""
 
-    L=""
-    R=""
+
+    L = ""
+    R = ""
 
     # Stores the length, and the middle of pattern
-    l = len(pattern[1])
-    l_half = int(l/2)
+    l_full = len(pattern[1])
+    l_half = int(l_full / 2)
 
     # T is reversible by a TDRL, or is the inverse of a TDRL
-    if(pattern[0]=="TDRL"):
-        misc_1=[]
-        misc_2=[]
+    if pattern[0] == "TDRL":
 
         # Derive pattern T(permutation,pattern) is subsequence of.
         # For TDRL, this is the first half of the input pattern
-        newpat="".join(pattern[1][0:l_half])
+        newpat = "".join(pattern[1][0:l_half])
 
         # The taus are sequentially created in this loop and appended to the
         # output permutation.
-        for i in range(0,l_half):
+        for i in range(0, l_half):
             try:
                 index_left = misc_dec[misc_mapping[i]][1]
                 index_right = misc_dec[misc_mapping[i]][2]
-                misc_1=permutation[index_left:index_right]
+                misc_1 = permutation[index_left:index_right]
             except KeyError:
-                misc_1=[]
+                misc_1 = []
             try:
-                index_left = misc_dec[misc_mapping[l_half+i]][1]
-                index_right = misc_dec[misc_mapping[l_half+i]][2]
-                misc_2=permutation[index_left:index_right]
+                index_left = misc_dec[misc_mapping[l_half + i]][1]
+                index_right = misc_dec[misc_mapping[l_half + i]][2]
+                misc_2 = permutation[index_left:index_right]
             except KeyError:
-                misc_2=[]
+                misc_2 = []
 
             # A string representation for L and R is created sequentially.
-            L+=stringify(misc_1)
-            R+=stringify(misc_2)
+            L += stringify(misc_1)
+            R += stringify(misc_2)
 
             # The sorted misc-substrings are appended to the output permutation.
-            taus+=oplus(misc_1,misc_2)
+            taus += oplus(misc_1, misc_2)
 
     # T is reversible by an liTDRL, hence is the inverse of an liTDRL
-    elif(pattern[0]=="liTDRL"):
-        misc_1=[]
-        misc_2=[]
+    elif pattern[0] == "liTDRL":
 
         # Derive pattern T(permutation,pattern) is subsequence of.
         # For liTDRL this is the last half of the pattern.
-        newpat="".join(pattern[1][l_half:len(pattern[1])])
+        newpat = "".join(pattern[1][l_half:len(pattern[1])])
 
         # The taus are sequentially created in this loop and appended to the
         # output permutation.
-        for i in range(0,l_half):
+        for i in range(0, l_half):
             try:
-                index_left = misc_dec[misc_mapping[l_half-i-1]][1]
-                index_right = misc_dec[misc_mapping[l_half-i-1]][2]
-                misc_1=permutation[index_left:index_right]
+                index_left = misc_dec[misc_mapping[l_half - i - 1]][1]
+                index_right = misc_dec[misc_mapping[l_half - i - 1]][2]
+                misc_1 = permutation[index_left:index_right]
             except KeyError:
-                misc_1=[]
+                misc_1 = []
             try:
-                index_left = misc_dec[misc_mapping[l_half+i]][1]
-                index_right = misc_dec[misc_mapping[l_half+i]][2]
-                misc_2=permutation[index_left:index_right]
+                index_left = misc_dec[misc_mapping[l_half + i]][1]
+                index_right = misc_dec[misc_mapping[l_half + i]][2]
+                misc_2 = permutation[index_left:index_right]
             except KeyError:
-                misc_2=[]
+                misc_2 = []
 
             # A string representation of L and R is created sequentially.
             # According to the definition of T, misc_1 is reversed.
-            L+=stringify(reverse(misc_1))
-            R+=stringify(misc_2)
+            L += stringify(reverse(misc_1))
+            R += stringify(misc_2)
 
             # The sorted misc-substrings are appended to the output permutation.
             # According to the definition of T, misc_1 is reversed.
-            taus+=oplus(reverse(misc_1),misc_2)
+            taus += oplus(reverse(misc_1), misc_2)
 
     # T is reversible by an riTDRL, hence is the inverse of an riTDRL
-    elif(pattern[0]=="riTDRL"):
-        misc_1=[]
-        misc_2=[]
+    elif pattern[0] == "riTDRL":
 
         # Derive pattern T(permutation,pattern) is subsequence of.
         # For riTDRL, this is the first half of the input pattern
-        newpat="".join(pattern[1][0:l_half])
-        for i in range(0,l_half):
+        newpat = "".join(pattern[1][0:l_half])
+        for i in range(0, l_half):
             try:
-                misc_1=permutation[misc_dec[misc_mapping[i]][1]:misc_dec[misc_mapping[i]][2]]
+                index_left = misc_dec[misc_mapping[i]][1]
+                index_right = misc_dec[misc_mapping[i]][2]
+                misc_1 = permutation[index_left:index_right]
             except KeyError:
-                misc_1=[]
+                misc_1 = []
             try:
-                misc_2=permutation[misc_dec[misc_mapping[l-i-1]][1]:misc_dec[misc_mapping[l-i-1]][2]]
+                index_left = misc_dec[misc_mapping[l_full - i - 1]][1]
+                index_right = misc_dec[misc_mapping[l_full - i - 1]][2]
+                misc_2 = permutation[index_left:index_right]
             except KeyError:
-                misc_2=[]
+                misc_2 = []
 
             # A string representation of L and R is created sequentially.
             # According to the definition of T, misc_2 is reversed.
-            L+=stringify(misc_1)
-            R+=stringify(reverse(misc_2))
+            L += stringify(misc_1)
+            R += stringify(reverse(misc_2))
 
             # The sorted misc-substrings are appended to the output permutation.
             # According to the definition of T, misc_1 is reversed.
-            taus+=oplus(misc_1,reverse(misc_2))
+            taus += oplus(misc_1, reverse(misc_2))
 
-    return (taus,newpat,pattern[0],L,R)
+    return taus, newpat, pattern[0], L, R
+
 
 def pprint_perm(permutation):
     """
@@ -460,4 +468,4 @@ def pprint_perm(permutation):
     str
         Canonical one-line representation of the permutation.
     """
-    print( "( " + "".join([str(x)+" " for x in permutation])[0:-1] + " )")
+    print("( " + "".join([str(x) + " " for x in permutation])[0:-1] + " )")
