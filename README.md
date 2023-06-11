@@ -3,7 +3,7 @@ Python program which implements the optimal sorting by TDRL/iTDRL algorithm by B
 
 ## FoCM Conference Poster
 
-<img width="1000" alt="Screenshot 2023-06-11 172628" src="https://github.com/bsfaqu/TDRLiTDRL_sorting/assets/60860433/f007030f-e353-4316-aa57-b59df0df08b3">
+<img width="1000" alt="Screenshot 2023-06-11 173034" src="https://github.com/bsfaqu/TDRLiTDRL_sorting/assets/60860433/970dfc0b-84ea-4422-9f95-8cda41b767aa">
 
 A .pdf version of this poster can also be found within this repository.
 
