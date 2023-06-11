@@ -10,11 +10,11 @@ cli_parser = argparse.ArgumentParser()
 
 cli_parser.add_argument("-r", "--random", type=int, help="randomly generate a permutation;" +
                                                          "\nspecify length as argument.")
-cli_parser.add_argument("-p", "--permutation", help="space separated target permutation, " +
-                                                    "\ni.e. 3 1 2 -4 -5 -6 7 8. ", nargs="+")
-cli_parser.add_argument("-i", "--identity", help="space separated identity permutation, " +
+cli_parser.add_argument("-p", "--permutation", type=str,help="space separated target permutation, " +
+                                                    "\ni.e. 3 1 2 -4 -5 -6 7 8. ")
+cli_parser.add_argument("-i", "--identity", type=str, help="space separated identity permutation, " +
                                                  "\ni.e. 1 2 3 4 5 6 7 8. \nThis argument is ignored if " +
-                                                 "-p/--permutation is not set.", nargs="+")
+                                                 "-p/--permutation is not set.")
 cli_parser.add_argument("-t", "--tabular", action="store_true", help="switches output to tabular")
 args = cli_parser.parse_args()
 
@@ -24,7 +24,7 @@ identity = []
 # Either take the input permutation, generate a random permutation, or default
 # to a permutation containing 37 elements in case neither -p nor -r are set.
 if args.permutation:
-    permutation = [int(x) for x in args.permutation]
+    permutation = [int(x) for x in args.permutation.split(" ")]
 elif args.random:
     permutation = list(rand_perm(args.random))
 
@@ -45,7 +45,7 @@ else:
 # If an identity permutation is specified, we alter the input permutation such
 # that the output is for optimally sorting identity -> permutation
 if args.identity:
-    identity = [int(x) for x in args.identity]
+    identity = [int(x) for x in args.identity.split(" ")]
 
     # To sort identity to pi we apply the inverse of identity to pi
     # (and the identity itself).
